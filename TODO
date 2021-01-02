@@ -1,0 +1,20 @@
+Organize Spotify Song Lists by Genre
+
+** = could technically outsource and do ahead of time and store in a file to call
+-- = only if first
+## = only do if not first time running
+
+Sequence of Steps
+1. Call Spotify API and Do All Necessary Authorization and Obtain Object(s) Needed for Further Steps
+2. Get List of All Genre's That Are Available in Spotify **
+3. Grab All Songs That User Has In Spotify Library and Store in Some Object 
+4a. Iterate Through Songs and Query Spotify API to obtain Genre for all Songs and Store in Song: Genre format --
+4b. Or could do my artists which may be easier for querying, storing, and efficiency --
+4c. Grab Recently Added Songs and Check if Songs Have Been Added to "Database" and if so then songs are not recent and thus
+    don't have to query for genre because more than likely, it should already be in a playlist for the User ##
+5. Save Genres As We Are Iterating To Keep Track of What Genre(s) We May Need to Generate Playlists For
+6. Check if Genre names Saved Above have already Had Playlists Created Or Not (If so .. step 8, if not .. step 7)
+7. Create Playlist (or store to indicate playlist needs to be created prior to adding music)
+8. At this point .. all genre playlists will have been created either previously or in the steps above
+9. Iterate through all songs and Add to There Respective Playlists 
+10. Done
