@@ -6,6 +6,7 @@ from spotipy.oauth2 import SpotifyOAuth
 import json
 import time
 import pandas as pd
+from SpotifyPlaylistByGenre import SpotifyPlaylistByGenre
 
 # Get Secret Tokens Needed
 keys = json.load(open("client_secret.json"))
@@ -41,8 +42,6 @@ def redirectPage():
     # items['external_urls']['uri']
     # items['external_urls']['name']
 
-
-
 @app.route('/getTracks')
 def getTracks():
     token_info = ""
@@ -52,20 +51,9 @@ def getTracks():
         print("User Not Logged In")
         return redirect("/")
 
-    sp = spotipy.Spotify(auth=token_info['access_token'])
-
-    all_songs = []
-    iter = 0
-    while True:
-        items = sp.current_user_saved_tracks(limit=50, offset = iter * 50)['items']
-        iter += 1
-        all_songs += items
-
-        if len(items) < 50:
-            break
-
-    return str(len(all_songs))
-
+    sp = SpotifyPlaylistByGenre(spotipy.Spotify(auth=token_info['access_token']))
+    return sp.get_tracks_deprecated()
+    
 # Check if Access Token is Expired .. if so Generate Refresh Token and make sure there is token data
 
 def get_token():
