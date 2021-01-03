@@ -35,15 +35,15 @@ def redirectPage():
     code = request.args.get('code')
     token_info = sp_oauth.get_access_token(code)
     session[TOKEN_INFO] = token_info
-    return redirect(url_for('getTracks', _external = True))
+    return redirect(url_for('main', _external = True))
 
 # Useful Keys That Are Generated From Saved Tracks
     # items['added_at']
     # items['external_urls']['uri']
     # items['external_urls']['name']
 
-@app.route('/getTracks')
-def getTracks():
+@app.route('/main')
+def main():
     token_info = ""
     try:
         token_info = get_token()
@@ -52,7 +52,7 @@ def getTracks():
         return redirect("/")
 
     sp = SpotifyPlaylistByGenre(spotipy.Spotify(auth=token_info['access_token']))
-    return sp.get_tracks_deprecated()
+    return sp.get_current_user_genre_playlists()
     
 # Check if Access Token is Expired .. if so Generate Refresh Token and make sure there is token data
 
