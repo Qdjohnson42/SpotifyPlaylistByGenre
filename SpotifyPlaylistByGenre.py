@@ -13,21 +13,20 @@ ALBUMS_CSV_FILE = "albums.csv"
 ARTISTS_CSV_FILE = "artists.csv"
 
 SPOTIFY_PLAYLIST_NAMES_DICT = {
-    "Pop": [],
-    "Jazz": [],
-    "Rap": [],
-    "Country": [],
-    "R&B": [],
-    "Worship": [],
-
+    "POP": set(),
+    "JAZZ": set(),
+    "RAP": set(),
+    "COUNTRY": set(),
+    "R&B": set(),
+    "WORSHIP": set()
 }
 
 SPOTIFY_PLAYLIST_NAMES = [
     'pop',
     'jazz',
     'rap',
-    'r&b',
     'country',
+    'r&b',
     'worship'
 ]
 
@@ -233,6 +232,8 @@ class SpotifyPlaylistByGenre:
                     })
 
                     # Update Global Dictionary for Playlist Creation
+                    SPOTIFY_PLAYLIST_NAMES_DICT[genre_to_use.upper()].add(song["id"])
+                    
         
                 all_art_songs[artist_id] = idv_artist # Create and Assign New Dict
             
@@ -245,15 +246,34 @@ class SpotifyPlaylistByGenre:
                     })
 
 
-
-            break
-
-        print(json.dumps(all_art_songs, indent=1))
+        #print(SPOTIFY_PLAYLIST_NAMES_DICT)
         # Name of Song, Artist, Album
-        
+
+        self.create_playlist(SPOTIFY_PLAYLIST_NAMES_DICT["R&B"])
+
         return str(all_liked_songs)
 
-    def create_playlist(self, list_of_tracks, playlist_name):
+
+    def create_playlist(self, tracks):
+        # Create Playlist
+        playlist_name = "R&B"
+
+        self.sp_client.user_playlist_create(self.user_id, playlist_name)
+
+        playlist_objs = dict()
+
+        # Get Newly Created Playlist ID
+        user_playlists = self.sp_client.user_playlists(self.user_id)["items"]
+        for playlist in user_playlists:
+            playlist_objs[playlist["name"]] = playlist["id"]
+
+        new_playlist_id = playlist_objs.get(playlist_name)
+        
+        # Now to create playlist with Songs
+        self.sp_client.user_playlist_add_tracks(self.user_id, new_playlist_id, tracks)
+        
+
+    def _create_playlist(self, list_of_tracks, playlist_name):
         # user_playlist_create -> Creating Playlist
 
         # user_playlist_add_tracks -> Adding Tracks to Playlist

@@ -74,7 +74,7 @@ def create_spotify_oauth():
         client_id = client.get("spotify_client_id"),
         client_secret = client.get("spotify_secret_key"),
         redirect_uri = url_for('redirectPage', _external = True),
-        scope = "user-library-read"
+        scope = "user-library-read playlist-modify-public"
     )
 
         #   "artist_id" : {
