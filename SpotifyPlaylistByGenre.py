@@ -14,7 +14,8 @@ ARTISTS_CSV_FILE = "artists.csv"
 
 SPOTIFY_PLAYLIST_NAMES_DICT = {
     "Pop": [],
-    "Hip Hop": [],
+    "Jazz": [],
+    "Rap": [],
     "Country": [],
     "R&B": [],
     "Worship": [],
@@ -24,7 +25,10 @@ SPOTIFY_PLAYLIST_NAMES_DICT = {
 SPOTIFY_PLAYLIST_NAMES = [
     'pop',
     'jazz',
-    'hip hop',
+    'rap',
+    'r&b',
+    'country',
+    'worship'
 ]
 
 class SpotifyPlaylistByGenre:
@@ -115,7 +119,6 @@ class SpotifyPlaylistByGenre:
         #                 }
         # }
 
-    
         # First .... ALL LIKED SONGS
         all_liked_songs = self._handle_calls(self.sp_client.current_user_saved_tracks, limit=10) # All Liked Songs
 
@@ -125,6 +128,7 @@ class SpotifyPlaylistByGenre:
         # URI : "uri" => str
         # ID : "id" => str
         # HREF: "href" => str
+        
         """
         # Loop through all songs for artist
         for song in all_liked_songs[:30]:
@@ -163,7 +167,7 @@ class SpotifyPlaylistByGenre:
 
                 # Already Existing Artists -> Dict Already Exists Just Need to Add Current Song to Artist Songs
                 else:
-                    idv_artist["songs"].update({
+                    all_art_songs[artist["id"]]["songs"].update({
                         track_name: track_id
                     })
 
@@ -178,21 +182,73 @@ class SpotifyPlaylistByGenre:
         album_uris = set()
         for album in all_albums:
             
+            # Album ID
             album_id = album["album"]["id"]
             album_ids.add(album_id)
 
+            # Album Name
             album_name = album["album"]["name"]
             album_names.add(album_name)
 
+            # Album URI
             album_uri = album["album"]["uri"]
             album_uris.add(album_uri)
 
-            # Now time for the fun part, tracks
+            # Artist ID and Name
+            artist_id = album["album"]["artists"][0]["id"]
+            artist_name = album["album"]["artists"][0]["name"]
+            artists_ids.add(artist_id) # Add Artists ID to global set of Artists ID just in case becomes handy in the future
+            artists_ids_dict[artist_name] = artist_id
+
+            artist_genres = self.sp_client.artist(artist_id)["genres"] # Get List of Genres for Artists
+            all_genres.update(artist_genres) # Update Global List to Keep Track of All Genres
+
+            # Get Genre that We Actually Care About for Playlist Purposes .. after run genre_to_use will contain genre to assign songs too
+            genre_found = False
+            for my_playlist_genre in SPOTIFY_PLAYLIST_NAMES:
+                for genre in artist_genres:
+                    if my_playlist_genre in genre and not genre_found:
+                        genre_to_use = my_playlist_genre
+                        genre_found = True
+                if genre_found:
+                    break
+
+            # Check if new dictionary  needs to be created (i.e., artist id doesn't already exist)
+            if artist_id not in all_art_songs:
+            
+                idv_artist = dict()
+                # Update IDV Object
+                idv_artist["name"] = artist_name
+                idv_artist["genres"] = artist_genres
+                #idv_artist["songs"] = [track_id]
+                idv_artist["songs"] = dict()
+                idv_artist["genre_for_playlist"] = genre_to_use
+
+                # Now time for the fun part, tracks
+                for song in album["album"]["tracks"]["items"]:
+                    
+                    # Update Information for Individual Artists
+                    idv_artist["songs"].update({
+                        song["name"] : song["id"]
+                    })
+
+                    # Update Global Dictionary for Playlist Creation
+        
+                all_art_songs[artist_id] = idv_artist # Create and Assign New Dict
+            
+            # Already Already Exists In Dictionary Just Need to Add Songs
+            else: 
+                for song in album["album"]["tracks"]["items"]:
+                    
+                    all_art_songs[artist_id]["songs"].update({
+                        song["name"] : song["id"]
+                    })
 
 
 
             break
 
+        print(json.dumps(all_art_songs, indent=1))
         # Name of Song, Artist, Album
         
         return str(all_liked_songs)
