@@ -116,6 +116,7 @@ class SpotifyPlaylistByGenre:
         # }
 
     
+        # First .... ALL LIKED SONGS
         all_liked_songs = self._handle_calls(self.sp_client.current_user_saved_tracks, limit=10) # All Liked Songs
 
         # Album: "album" => album object "dictionary"
@@ -124,55 +125,73 @@ class SpotifyPlaylistByGenre:
         # URI : "uri" => str
         # ID : "id" => str
         # HREF: "href" => str
-
+        """
         # Loop through all songs for artist
-        for song in all_liked_songs[:10]:
+        for song in all_liked_songs[:30]:
 
             track_id = song["track"]["id"] # Get ID for Track
+            track_name = song["track"]["name"] # Get Name of Track
 
             for artist in song["track"]["artists"]:
 
                 # Check If Artist Already Has Dictionary Created for Him/Her .. if so, all we have to do is add song to songs of artist_id
                 artist_id = artist["id"]
                 
-                        # New Artists
+                # New Artists -> Need to Create Dictionary for Artist
+                if artist_id not in all_art_songs:
 
-                # Extract Relevant Information for Artist
-                artist_name = artist["name"]
-                artist_genres = self.sp_client.artist(artist["id"])["genres"] # Get List of Genres for Artists
+                    idv_artist = dict()
 
-                # Update IDV Object
-                idv_artist = dict()
-                idv_artist["name"] = artist["name"]
-                idv_artist["genres"] = artist_genres
-                #idv_artist["songs"] = [track_id]
-                idv_artist["songs"] = {
-                    song["track"]["name"]: track_id
-                }
+                    # Extract Relevant Information for Artist
+                    artist_name = artist["name"]
+                    artist_genres = self.sp_client.artist(artist["id"])["genres"] # Get List of Genres for Artists
 
-                all_art_songs[artist_id] = idv_artist # Create and Assign New Dict
+                    # Update IDV Object
+                    idv_artist["name"] = artist["name"]
+                    idv_artist["genres"] = artist_genres
+                    #idv_artist["songs"] = [track_id]
+                    idv_artist["songs"] = {
+                        track_name : track_id
+                    }
 
-                # Update Outer Variables 
-                artists_ids.add(artist["id"]) # Add Artists ID to global set of Artists ID just in case becomes handy in the future
-                artists_ids_dict[artist_name] = artist_id
-                all_genres.update(artist_genres) # Update Global List to Keep Track of All Genres
+                    all_art_songs[artist_id] = idv_artist # Create and Assign New Dict
 
-                        # Already Existing Artists
+                    # Update Outer Variables 
+                    artists_ids.add(artist["id"]) # Add Artists ID to global set of Artists ID just in case becomes handy in the future
+                    artists_ids_dict[artist_name] = artist_id
+                    all_genres.update(artist_genres) # Update Global List to Keep Track of All Genres
+
+                # Already Existing Artists -> Dict Already Exists Just Need to Add Current Song to Artist Songs
+                else:
+                    idv_artist["songs"].update({
+                        track_name: track_id
+                    })
+
+                break # Only care about first artist , primary artist so continue on to next song (could use [0] instead but nah)
+        """
+
+        # Second All Albums
+        all_albums = self._handle_calls(self.sp_client.current_user_saved_albums, limit=1) # All Album Objects
+
+        album_ids = set()
+        album_names = set()
+        album_uris = set()
+        for album in all_albums:
             
-        
-        print(json.dumps(all_art_songs, indent=1))
-                
+            album_id = album["album"]["id"]
+            album_ids.add(album_id)
+
+            album_name = album["album"]["name"]
+            album_names.add(album_name)
+
+            album_uri = album["album"]["uri"]
+            album_uris.add(album_uri)
+
+            # Now time for the fun part, tracks
 
 
-        
 
-
-        
-        
-        
-        
-        #all_albums = self._handle_calls(self.sp_client.current_user_saved_albums, limit=1) # All Album Objects
-        #print(all_albums[0])
+            break
 
         # Name of Song, Artist, Album
         
