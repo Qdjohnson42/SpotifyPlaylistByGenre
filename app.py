@@ -52,7 +52,7 @@ def main():
         return redirect("/")
 
     sp = SpotifyPlaylistByGenre(spotipy.Spotify(auth=token_info['access_token']))
-    return sp.get_current_user_genre_playlists()
+    return sp.get_all_user_tracks()
     
 # Check if Access Token is Expired .. if so Generate Refresh Token and make sure there is token data
 
@@ -76,3 +76,10 @@ def create_spotify_oauth():
         redirect_uri = url_for('redirectPage', _external = True),
         scope = "user-library-read"
     )
+
+        #   "artist_id" : {
+        #                   "name_of_artist": "name", 
+        #                   "genres": [list of genres],
+        #                   "songs": [list of songs]
+        #                 }
+        # }
